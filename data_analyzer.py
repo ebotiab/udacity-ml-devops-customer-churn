@@ -2,7 +2,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns; sns.set()
 
-
 class DataAnalyzer:
     def __init__(self, df, filepath):
         """
@@ -17,34 +16,42 @@ class DataAnalyzer:
         returns dataframe for the csv found at pth
 
         input:
-                None
+            None
         output:
-                df: pandas dataframe
+            df: pandas dataframe
         '''	
-        pass
+        return pd.read_csv(self.filepath)
 
-    def perform_eda(self):
+    def perform_eda(self, category_lst: list[str], filepath: str, response: str | None = None):
         '''
         perform eda on self.data and save figures to images folder
         input:
-                None
+            None
 
         output:
-                None
+            None
         '''
-        pass
+        print("Performing EDA")
+        print("\n- Display the first 5 rows of the data:")
+        print(self.data.head())
+        print("\n- Display the data dimensions:")
+        print(self.data.shape)
+        print("\n- Display the number of missing values for each column:")
+        print(self.data.isnull().sum())
+        print("\n- Display description of the data:")
+        print(self.data.describe())
 
-    def encoder_helper(self, category_lst: list[str], response: str | None = None):
+    def _encoder_helper(self, category_lst: list[str], response: str | None = None):
         '''
         helper function to turn each categorical column into a new column with
         proportion of churn for each category - associated with cell 15 from the notebook
 
         input:
-                df: pandas dataframe
-                category_lst: list of columns that contain categorical features
-                response: string of response name [optional argument that could be used for naming variables or index y column]
+            df: pandas dataframe
+            category_lst: list of columns that contain categorical features
+            response: string of response name [optional argument that could be used for naming variables or index y column]
 
         output:
-                df: pandas dataframe with new columns for
+            df: pandas dataframe with new columns for
         '''
         pass
