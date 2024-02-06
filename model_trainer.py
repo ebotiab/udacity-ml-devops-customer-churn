@@ -1,3 +1,5 @@
+from typing import Any
+
 import shap
 import joblib
 import numpy as np
@@ -14,13 +16,13 @@ from sklearn.metrics import roc_curve, classification_report
 
 class ModelTrainer:
 
-    def __init__(self, data: pd.DataFrame):
+    def __init__(self, data: pd.DataFrame, model: Any):
         '''
         Class to perform feature engineering, train and evaluate models
         It will generate visualizations and store the results in the images folder.
         '''
         self.data = data
-        self.model = RandomForestClassifier()  # Using RandomForest for illustration
+        self.model = model
         self.X_train, self.X_test, self.y_train, self.y_test = [None] * 4
         self.feature_importance = None
 
