@@ -37,7 +37,7 @@ First, ensure that your Python environment is correctly set up with the necessar
 - Install the required packages using the `requirements_py3.6.txt` or `requirements_py3.8.txt` file, depending on your Python version:
 
   ```bash
-  pip install -r requirements_py3.[6|8].txt
+  pip install -r requirements_py3.[6|8|12].txt
   ```
 
 #### 2. Data Preparation
