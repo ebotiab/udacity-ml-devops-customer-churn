@@ -7,44 +7,13 @@ os.environ['QT_QPA_PLATFORM']='offscreen'
 
 
 
-def import_data(pth):
-    '''
-    returns dataframe for the csv found at pth
-
-    input:
-            pth: a path to the csv
-    output:
-            df: pandas dataframe
-    '''	
-	pass
 
 
-def perform_eda(df):
-    '''
-    perform eda on df and save figures to images folder
-    input:
-            df: pandas dataframe
-
-    output:
-            None
-    '''
-	pass
 
 
-def encoder_helper(df, category_lst, response):
-    '''
-    helper function to turn each categorical column into a new column with
-    propotion of churn for each category - associated with cell 15 from the notebook
 
-    input:
-            df: pandas dataframe
-            category_lst: list of columns that contain categorical features
-            response: string of response name [optional argument that could be used for naming variables or index y column]
 
-    output:
-            df: pandas dataframe with new columns for
-    '''
-    pass
+
 
 
 def perform_feature_engineering(df, response):
