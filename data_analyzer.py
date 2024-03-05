@@ -1,3 +1,7 @@
+"""
+This module contains the DataAnalyzer class which is used to load and analyze data.
+"""
+
 import logging
 from typing import Tuple
 
@@ -5,100 +9,123 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-sns.set()
+sns.set_theme()
+logger = logging.getLogger(__name__)
 
 
 class DataAnalyzer:
-    def __init__(self, filepath):
+    """
+    Load and analyze data from a specified file.
+    It will generate visualizations and store the results in the desired folder.
+    """
+
+    def __init__(self, filepath: str):
         """
-        Class to load and analyze data from a specified file.
-        It will generate visualizations and store the results in the images folder.
+        input:
+            filepath: string of the file path
+        output:
+            None
         """
-        self.logger = logging.getLogger(__name__)
-        self.filepath = filepath
-        self.data = self.import_data()
+        self.data = pd.read_csv(filepath)
 
-    def import_data(self):
-        """returns dataframe for the csv found at pth"""
-        return pd.read_csv(self.filepath)
+    def perform_eda(
+        self,
+        out_folder: str,
+        cols_to_plot: list[str] | None = None,
+        figsize: Tuple[float, float] = (20, 10),
+    ):
+        """
+        perform Exploratory Data Analysis on self.data and save figures to out_folder
+        input:
+            out_folder: string of the folder name to save the figures
+            cols_to_plot: list of columns to plot their distribution
+            figsize: tuple of figure size
+        output:
+            None
+        """
+        self.plot_data_basic_info(out_folder, figsize)
 
-    def perform_eda(self, out_filepath: str):
-        """perform eda on self.data and save figures to images folder"""
+        for col in cols_to_plot or []:
+            self.plot_distribution(col, out_folder)
 
+        self.plot_correlation(out_folder)
+
+    def plot_data_basic_info(
+        self, out_folder: str, figsize: Tuple[float, float] = (20, 10)
+    ):
+        """
+        plot basic information about the data, plot it and save the figure
+        input:
+            out_folder: string of the folder name to save the figures
+            figsize: tuple of figure size
+        output:
+            None
+        """
         data_head = self.data.head().to_string()
         data_shape = str(self.data.shape)
         missing_values = self.data.isnull().sum().to_string()
         data_description = self.data.describe().to_string()
-        full_text = f"""Performing EDA
-
-        - Display the first 5 rows of the data:
-        {data_head}
-
-        - Display the data dimensions:
-        {data_shape}
-
-        - Display the number of missing values for each column:
-        {missing_values}
-
-        - Display description of the data:
-        {data_description}
+        basic_info_txt = f"""Performing EDA
+        \n- Display the first 5 rows of the data:\n{data_head}
+        \n- Display the data dimensions:\n{data_shape}
+        \n- Display the number of missing values for each column:\n{missing_values}
+        \n- Display description of the data:\n{data_description}
         """
-        print(full_text)
-        fig = plt.figure(figsize=(10, 8))
+        fig = plt.figure(figsize=figsize)
         ax = fig.add_subplot(111, frame_on=False)
         ax.xaxis.set_visible(False)
         ax.yaxis.set_visible(False)
-        ax.text(0.5, 1, full_text, fontsize=10, transform=ax.transAxes)
-
-        # Save the figure
-        plt.savefig(out_filepath, bbox_inches="tight")
-        plt.close(fig)
+        ax.text(0.5, 1, basic_info_txt, transform=ax.transAxes)
+        plt.savefig(f"{out_folder}/data_basic_info.png", bbox_inches="tight")
+        logger.info(
+            "Basic data info has been saved in %s/data_basic_info.png", out_folder
+        )
+        plt.show()
 
     def plot_distribution(
-        self, col_name: str, out_filepath: str, figsize: Tuple[float, float] = (20, 10)
+        self, col_name: str, out_folder: str, figsize: Tuple[float, float] = (20, 10)
     ):
-        """plot histogram or bar chart of the specified column and save the figure"""
-        self.logger.debug(f"Display the distribution of {col_name} col:")
-        plt.figure(figsize=figsize)
-        col_type = self.data[col_name].dtype
-        if col_type in ["int64", "float64"]:
-            sns.histplot(self.data[col_name], stat="density", kde=True)
-        elif col_type == "object":
-            sns.countplot(self.data[col_name])
-        else:
-            self.logger.warning(
-                f"Column {col_name} has {col_type} type, which is not a valid type for distribution plot"
-            )
-            return
-        plt.title(f"Distribution of {col_name}")
-        plt.savefig(f"{out_filepath}/{col_name}_distribution.png")
-        plt.show()
-
-    def plot_correlation(
-        self, out_filepath: str, figsize: Tuple[float, float] = (20, 10)
-    ):
-        """plot correlation matrix and save the figure"""
-        self.logger.debug("Display the correlation matrix")
-        plt.figure(figsize=figsize)
-        sns.heatmap(self.data.corr(), annot=False, cmap="Dark2_r", linewidths=2)
-        plt.title("Correlation Matrix")
-        plt.savefig(f"{out_filepath}/correlation_matrix.png")
-        plt.show()
-
-    def encoder_helper(self, category_lst: list[str], response: str):
         """
-        helper function to turn each categorical column into a new column with
-        proportion of the response variable for each category
+        plot histogram or bar chart of the specified column and save the figure
         input:
-            df: pandas dataframe
-            category_lst: list of columns that contain categorical features
-            response: string of response name [optional argument that could be used for naming variables or index y column]
+            col_name: string of the column name to plot
+            out_folder: string of the folder name to save the figures
+            figsize: tuple of figure size
         output:
             None
         """
-        response = response or self.data.columns[-1]
+        logger.info("Display the distribution of %s col:", col_name)
+        plt.figure(figsize=figsize)
+        col_type = self.data[col_name].dtype
+        if col_type in ["int64", "float64"]:
+            sns.histplot(self.data[[col_name]], stat="density", kde=True)
+        elif col_type == "object":
+            sns.countplot(self.data[[col_name]])
+        else:
+            logger.warning("Col %s has %s type invalid to plot", col_name, col_type)
+            return
+        plt.title(f"Distribution of {col_name}")
+        img_filepath = f"{out_folder}/{col_name}_distribution.png"
+        plt.savefig(img_filepath)
+        logger.info("Distribution saved in %s", img_filepath)
+        plt.show()
 
-        for category in category_lst:
-            category_groups = self.data.groupby(category)[response].mean()
-            encoded_lst = [category_groups.loc[val] for val in self.data[category]]
-            self.data[f"{category}_{response}"] = encoded_lst
+    def plot_correlation(
+        self, out_folder: str, figsize: Tuple[float, float] = (20, 10)
+    ):
+        """
+        plot correlation matrix and save the figure
+        input:
+            out_folder: string of the folder name to save the figures
+            figsize: tuple of figure size
+        output:
+            None
+        """
+        logger.info("Display the correlation matrix")
+        plt.figure(figsize=figsize)
+        sns.heatmap(self.data.corr(), annot=False, cmap="Dark2_r", linewidths=2)
+        plt.title("Correlation Matrix")
+        img_filepath = f"{out_folder}/correlation_matrix.png"
+        plt.savefig(img_filepath)
+        logger.info("Correlation matrix saved in %s", img_filepath)
+        plt.show()
