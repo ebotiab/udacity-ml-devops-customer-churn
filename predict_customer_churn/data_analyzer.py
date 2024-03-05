@@ -3,7 +3,7 @@ This module contains the DataAnalyzer class which is used to load and analyze da
 """
 
 import logging
-from typing import Tuple
+from typing import Any, Tuple
 
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,14 +19,24 @@ class DataAnalyzer:
     It will generate visualizations and store the results in the desired folder.
     """
 
-    def __init__(self, filepath: str):
+    def __init__(
+        self,
+        filepath: str,
+        values_map: dict[str, dict[Any, Any]] | None = None,
+        rename_cols: dict[str, str] | None = None,
+    ):
         """
         input:
             filepath: string of the file path
         output:
             None
         """
-        self.data = pd.read_csv(filepath)
+        df = pd.read_csv(filepath)
+        if values_map:
+            df = df.replace(values_map)
+        if rename_cols:
+            df = df.rename(columns=rename_cols)
+        self.data = df
 
     def perform_eda(
         self,
@@ -80,7 +90,6 @@ class DataAnalyzer:
         logger.info(
             "Basic data info has been saved in %s/data_basic_info.png", out_folder
         )
-        plt.show()
 
     def plot_distribution(
         self, col_name: str, out_folder: str, figsize: Tuple[float, float] = (20, 10)
@@ -108,7 +117,6 @@ class DataAnalyzer:
         img_filepath = f"{out_folder}/{col_name}_distribution.png"
         plt.savefig(img_filepath)
         logger.info("Distribution saved in %s", img_filepath)
-        plt.show()
 
     def plot_correlation(
         self, out_folder: str, figsize: Tuple[float, float] = (20, 10)
@@ -128,4 +136,3 @@ class DataAnalyzer:
         img_filepath = f"{out_folder}/correlation_matrix.png"
         plt.savefig(img_filepath)
         logger.info("Correlation matrix saved in %s", img_filepath)
-        plt.show()

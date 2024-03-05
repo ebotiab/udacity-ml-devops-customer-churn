@@ -6,16 +6,18 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 import pytest
 
-from ..config import (
+from tests.config import (
     RAW_DATA_PATH,
-    KEEP_COLS,
+    VALUES_MAP_COLS,
+    RENAME_COLS,
+    KEEP_FEATS,
     RESPONSE,
     RANDOM_STATE,
     RFC_PARAM_GRID,
     LRC_PARAMS,
     NUM_FOLDS,
 )
-from ..models_trainer import ModelsTrainer
+from predict_customer_churn import DataAnalyzer, ModelsTrainer
 
 
 @pytest.fixture
@@ -23,7 +25,7 @@ def churn_data():
     """
     load churn data
     """
-    return pd.read_csv(RAW_DATA_PATH)
+    return DataAnalyzer(RAW_DATA_PATH, VALUES_MAP_COLS, RENAME_COLS).data
 
 
 @pytest.fixture
@@ -34,7 +36,7 @@ def models_trainer(churn_data: pd.DataFrame):
     rfc = RandomForestClassifier(random_state=RANDOM_STATE)
     cv_rfc = GridSearchCV(estimator=rfc, param_grid=RFC_PARAM_GRID, cv=NUM_FOLDS)
     lrc = LogisticRegression(**LRC_PARAMS)
-    return ModelsTrainer(churn_data, [cv_rfc, lrc], RESPONSE, KEEP_COLS)
+    return ModelsTrainer(churn_data, [cv_rfc, lrc], RESPONSE, KEEP_FEATS)
 
 
 @pytest.fixture

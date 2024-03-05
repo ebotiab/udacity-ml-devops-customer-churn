@@ -5,8 +5,8 @@ This module contains the unit tests for the data_analyzer module.
 import os
 import logging
 
-from .config import COLS_TO_PLOT, IMAGES_EDA_PATH, PLT_FIGSIZE, RAW_DATA_PATH
-from .data_analyzer import DataAnalyzer
+from tests.config import COLS_TO_PLOT, IMAGES_EDA_PATH, PLT_FIGSIZE, RAW_DATA_PATH
+from predict_customer_churn import DataAnalyzer
 
 logging.basicConfig(
     filename="./logs/churn_library.log",
@@ -46,14 +46,9 @@ def test_perform_eda():
     # Create an instance of the DataAnalyzer class
     data_analyzer = DataAnalyzer(RAW_DATA_PATH)
 
-    # Define the inputs for the perform_eda method
-    out_folder = IMAGES_EDA_PATH
-    cols_to_plot = COLS_TO_PLOT
-    figsize = PLT_FIGSIZE
-
     # Call the perform_eda method
     try:
-        data_analyzer.perform_eda(out_folder, cols_to_plot, figsize)
+        data_analyzer.perform_eda(IMAGES_EDA_PATH, COLS_TO_PLOT, PLT_FIGSIZE)
         logging.info(
             "EDA executed successfully and figures saved in %s", IMAGES_EDA_PATH
         )
@@ -63,10 +58,10 @@ def test_perform_eda():
 
     # Assert that the necessary plots are saved in the output folder
     try:
-        assert os.path.exists(os.path.join(out_folder, "data_basic_info.png"))
-        for col in cols_to_plot:
-            assert os.path.exists(os.path.join(out_folder, f"{col}_distribution.png"))
-        assert os.path.exists(os.path.join(out_folder, "correlation_matrix.png"))
+        assert os.path.exists(os.path.join(IMAGES_EDA_PATH, "data_basic_info.png"))
+        for col in COLS_TO_PLOT:
+            assert os.path.exists(os.path.join(IMAGES_EDA_PATH, f"{col}_distribution.png"))
+        assert os.path.exists(os.path.join(IMAGES_EDA_PATH, "correlation_matrix.png"))
     except AssertionError as err:
         logging.error(
             "Testing perform_eda: The expected plots were not saved in the output folder"

@@ -17,7 +17,14 @@ COLS_TO_PLOT = [
 RESPONSE = 'Churn'
 PLT_FIGSIZE = (20, 5)
 
-KEEP_COLS = [
+VALUES_MAP_COLS = {
+    "Attrition_Flag": {"Existing Customer": 0, "Attrited Customer": 1},
+}
+RENAME_COLS = {
+    "Attrition_Flag": "Churn",
+}
+
+KEEP_FEATS = [
     'Customer_Age', 'Dependent_count', 'Months_on_book', 
     'Total_Relationship_Count', 'Months_Inactive_12_mon',
     'Contacts_Count_12_mon', 'Credit_Limit', 'Total_Revolving_Bal',

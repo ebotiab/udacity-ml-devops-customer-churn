@@ -75,6 +75,7 @@ class ModelsTrainer:
         self, df: pd.DataFrame, response: str | None = None, keep_cols=None
     ):
         """
+        performs feature engineering and returns training and testing data
         input:
             response: string of response name
         output:
@@ -83,8 +84,9 @@ class ModelsTrainer:
                 y_train: y training data
                 y_test: y testing data
         """
-        category_col_names = df.select_dtypes(include=["object"]).columns.to_list()
         response = response or df.columns[-1]
+        
+        category_col_names = df.select_dtypes(include=["object"]).columns.to_list()
         df_encoded = self.encoder_helper(df, category_col_names, response)[keep_cols]
         X = df_encoded[keep_cols or df_encoded.columns].values
         y = df[response]

@@ -11,8 +11,8 @@ import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
-from ..config import IMAGES_RESULTS_PATH, RESPONSE, KEEP_COLS
-from ..models_trainer import ModelsTrainer
+from tests.config import IMAGES_RESULTS_PATH, RESPONSE, KEEP_FEATS
+from predict_customer_churn import ModelsTrainer
 
 logging.basicConfig(
     filename="./logs/churn_library.log",
@@ -60,7 +60,7 @@ def test_perform_feature_engineering(
 
     try:
         X_train, X_test, y_train, y_test = models_trainer.perform_feature_engineering(
-            churn_data, RESPONSE, KEEP_COLS
+            churn_data, RESPONSE, KEEP_FEATS
         )
         logging.info("Feature engineering executed successfully")
     except Exception as e:
@@ -68,8 +68,8 @@ def test_perform_feature_engineering(
         raise e
     # Assert that the encoded dataframe has KEEP_COLS columns
     try:
-        assert all(col not in X_train.columns for col in KEEP_COLS)
-        assert all(col not in X_test.columns for col in KEEP_COLS)
+        assert all(col not in X_train.columns for col in KEEP_FEATS)
+        assert all(col not in X_test.columns for col in KEEP_FEATS)
         assert y_train.name == RESPONSE
         assert y_test.name == RESPONSE
     except AssertionError as err:
@@ -87,7 +87,7 @@ def test_classification_report_image(
     """
     logging.info("Generating classification report")
     try:
-        img_results_filepath = "images/test_cl_report.png"
+        img_results_filepath = os.path.join("images", "results", "test_cl_report.png")
         models_trainer.classification_report_image(
             train_preds, test_preds, img_results_filepath
         )
@@ -115,7 +115,7 @@ def test_feature_importance_plot(models_trainer: ModelsTrainer, first_model: Any
     logging.info("Generating feature importance plot")
 
     try:
-        img_results_filepath = "images/test_feat_imp.png"
+        img_results_filepath = os.path.join("images", "results", "test_feat_imp.png")
         models_trainer.feature_importance_plot(first_model, img_results_filepath)
         logging.info("Feature importance plot generated successfully")
     except Exception as e:
@@ -141,7 +141,7 @@ def test_plot_roc_curve(models_trainer: ModelsTrainer, test_preds: np.ndarray):
     logging.info("Generating ROC curve")
 
     try:
-        img_results_filepath = "images/test_roc_curve.png"
+        img_results_filepath = os.path.join("images", "results", "test_roc_curve.png")
         models_trainer.plot_roc_curve(test_preds, img_results_filepath)
         logging.info("ROC curve generated successfully")
     except Exception as e:
