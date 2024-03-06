@@ -104,6 +104,7 @@ class DataAnalyzer:
             None
         """
         col_type = self.data[col_name].dtype
+        plt.figure(figsize=figsize)
         if col_type in ["int64", "float64"]:
             sns.histplot(self.data[[col_name]], stat="density", kde=True)
         elif col_type == "object":
@@ -111,7 +112,6 @@ class DataAnalyzer:
         else:
             logger.warning("Col %s has %s type invalid to plot", col_name, col_type)
             return
-        plt.figure(figsize=figsize)  #
         plt.title(f"Distribution of {col_name}")
         img_filepath = f"{out_folder}/{col_name}_distribution.png"
         plt.savefig(img_filepath)

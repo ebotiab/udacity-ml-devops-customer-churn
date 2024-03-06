@@ -12,19 +12,17 @@ In this project, participants are tasked with applying their knowledge to pinpoi
 
 - **models/**: This folder holds the trained machine learning models that have been developed to predict customer churn. These models are the output of the analysis and training process.
 
-- **Guide.ipynb**: A Jupyter notebook providing guidance on how to navigate through and utilize the project, including steps for data preprocessing, model training, and evaluation.
+- **notebooks/Guide.ipynb**: A Jupyter notebook providing guidance on how to navigate through and utilize the project, including steps for data preprocessing, model training, and evaluation.
 
 - **README.md**: The markdown file containing an overview of the project, including its purpose, structure, setup instructions, and usage guidelines.
 
-- **churn_library.py**: A Python library that encapsulates the core functionality of the project, including data preprocessing, model training, and prediction routines, adhering to best coding practices.
+- **predict_customer_churn/**: A Python library that encapsulates the core functionality of the project, including data preprocessing, model training, and prediction routines, adhering to best coding practices.
 
-- **churn_notebook.ipynb**: A Jupyter notebook that demonstrates the workflow of the project from data loading, analysis, model training, and evaluation, serving as an interactive guide.
+- **notebooks/churn_notebook.ipynb**: A Jupyter notebook that demonstrates the workflow of the project from data loading, analysis, model training, and evaluation, serving as an interactive guide.
 
-- **churn_script_logging_and_tests.py**: This script contains logging and unit tests for the project, ensuring the code quality and reliability of the functions within the Python package.
+- **tests/**: These scripts contain logging and unit tests for the project, ensuring the code quality and reliability of the functions within the Python package.
 
-- **requirements_py3.6.txt**: A file listing the project dependencies required for Python 3.6 environment, ensuring reproducibility.
-
-- **requirements_py3.8.txt**: Similarly, this file specifies the dependencies for the project in a Python 3.8 environment, facilitating the setup in different Python versions.
+- **requirements_py3.10.txt**: A file listing the project dependencies required for Python 3.10 environment, ensuring reproducibility.
 
 ## Running Files
 
@@ -34,10 +32,10 @@ To run the files in this project and fully utilize its capabilities, follow the 
 
 First, ensure that your Python environment is correctly set up with the necessary dependencies:
 
-- Install the required packages using the `requirements_py3.6.txt` or `requirements_py3.8.txt` file, depending on your Python version:
+- Install the required packages using the `requirements_py3.10.txt`:
 
   ```bash
-  pip install -r requirements_py3.[6|8|12].txt
+  pip install -r requirements_py3.10.txt
   ```
 
 #### 2. Data Preparation
@@ -50,7 +48,7 @@ First, ensure that your Python environment is correctly set up with the necessar
 - Execute the library script from the command line:
 
   ```bash
-  ipython churn_library.py
+  ipython -m predict_customer_churn
   ```
 
 - Upon running, the script will preprocess the data, train the model(s), evaluate performance, and save the output models to the models/ directory.
@@ -60,7 +58,7 @@ First, ensure that your Python environment is correctly set up with the necessar
 - To ensure the reliability and stability of the project code, run the logging and test script:
 
   ```bash
-  python churn_script_logging_and_tests.py
+  pytest
   ```
 
-- This script will execute a series of tests on the functions within the `churn_library.py` and log the outcomes, highlighting any errors or issues in the process.
+- This script will execute a series of tests on the functions within the `churn_library/` files and log the outcomes, highlighting any errors or issues in the process.
