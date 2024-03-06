@@ -1,0 +1,13 @@
+root - INFO - Starting the main function
+predict_customer_churn.data_analyzer - INFO - Basic data info has been saved in ./images/eda/data_basic_info.png
+predict_customer_churn.data_analyzer - INFO - Distribution saved in ./images/eda/Churn_distribution.png
+predict_customer_churn.data_analyzer - INFO - Distribution saved in ./images/eda/Customer_Age_distribution.png
+predict_customer_churn.data_analyzer - INFO - Distribution saved in ./images/eda/Marital_Status_distribution.png
+predict_customer_churn.data_analyzer - INFO - Distribution saved in ./images/eda/Total_Trans_Ct_distribution.png
+predict_customer_churn.data_analyzer - INFO - Correlation matrix saved in ./images/eda/correlation_matrix.png
+predict_customer_churn.models_trainer - INFO - model trained saved in ./models\rfc_model.pkl
+predict_customer_churn.models_trainer - INFO - model trained saved in ./models\lrc_model.pkl
+predict_customer_churn.models_trainer - INFO - classification report generated and saved in ./images/results\rfc_cl_report.png
+predict_customer_churn.models_trainer - INFO - ROC curve generated and saved in ./images/results\roc_curve.png
+predict_customer_churn.models_trainer - INFO - classification report generated and saved in ./images/results\lrc_cl_report.png
+predict_customer_churn.models_trainer - INFO - ROC curve generated and saved in ./images/results\roc_curve.png

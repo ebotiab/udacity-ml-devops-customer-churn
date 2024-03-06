@@ -4,8 +4,8 @@ This file contains the configuration variables used in the project.
 
 RAW_DATA_PATH = "./data/bank_data.csv"
 MODELS_PATH = "./models"
-IMAGES_EDA_PATH = "./images/eda"
-IMAGES_RESULTS_PATH = "./images/results"
+IMAGES_EDA_PATH = "./tests/images/eda"
+IMAGES_RESULTS_PATH = "./tests/images/results"
 
 COLS_TO_PLOT = [
     'Churn',
@@ -15,7 +15,7 @@ COLS_TO_PLOT = [
 ]
 
 RESPONSE = 'Churn'
-PLT_FIGSIZE = (20, 5)
+PLT_FIGSIZE = (20, 10)
 
 VALUES_MAP_COLS = {
     "Attrition_Flag": {"Existing Customer": 0, "Attrited Customer": 1},
@@ -48,4 +48,4 @@ NUM_FOLDS = 5
 
 # Use a different solver if the default 'lbfgs' fails to converge
 # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-LRC_PARAMS = {"solver":'lbfgs', "max_iter": 3000}
+LRC_PARAMS = {"solver":'newton-cholesky', "max_iter": 3000}

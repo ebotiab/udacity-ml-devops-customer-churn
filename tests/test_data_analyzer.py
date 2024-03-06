@@ -5,11 +5,13 @@ This module contains the unit tests for the data_analyzer module.
 import os
 import logging
 
-from tests.config import COLS_TO_PLOT, IMAGES_EDA_PATH, PLT_FIGSIZE, RAW_DATA_PATH
-from predict_customer_churn import DataAnalyzer
+import matplotlib.pyplot as plt
+
+from .config import COLS_TO_PLOT, IMAGES_EDA_PATH, PLT_FIGSIZE, RAW_DATA_PATH
+from ..predict_customer_churn import DataAnalyzer
 
 logging.basicConfig(
-    filename="./logs/churn_library.log",
+    filename="./tests/logs/churn_library.log",
     level=logging.INFO,
     filemode="w",
     format="%(name)s - %(levelname)s - %(message)s",
@@ -35,35 +37,75 @@ def test_import():
             "Testing import_data: The file doesn't appear to have rows and columns"
         )
         raise err
+    
 
-
-def test_perform_eda():
+def test_plot_data_basic_info(data_analyzer: DataAnalyzer):
     """
-    test perform eda function
+    test plot data basic info function
     """
-    logging.info("Performing EDA")
+    logging.info("Plotting basic info")
 
-    # Create an instance of the DataAnalyzer class
-    data_analyzer = DataAnalyzer(RAW_DATA_PATH)
-
-    # Call the perform_eda method
+    # Call the plot_data_basic_info method
     try:
-        data_analyzer.perform_eda(IMAGES_EDA_PATH, COLS_TO_PLOT, PLT_FIGSIZE)
-        logging.info(
-            "EDA executed successfully and figures saved in %s", IMAGES_EDA_PATH
-        )
+        data_analyzer.plot_data_basic_info(IMAGES_EDA_PATH, PLT_FIGSIZE)
+        logging.info("Basic info plot executed successfully")
     except Exception as e:
-        logging.error("An error occurred during EDA: %s", e)
+        logging.error("An error occurred during basic info plot: %s", e)
         raise e
 
-    # Assert that the necessary plots are saved in the output folder
+    # Assert that the plot is saved in the output folder
     try:
         assert os.path.exists(os.path.join(IMAGES_EDA_PATH, "data_basic_info.png"))
+    except AssertionError as err:
+        logging.error(
+            "Testing plot_data_basic_info: The expected plot was not saved in the output folder"
+        )
+        raise err
+    
+def test_plot_distribution(data_analyzer: DataAnalyzer):
+    """
+    test plot distribution function
+    """
+    logging.info("Plotting distribution")
+
+    # Call the plot_distribution method
+    try:
+        for col in COLS_TO_PLOT:
+            data_analyzer.plot_distribution(col, IMAGES_EDA_PATH)
+        logging.info("Distribution plots executed successfully")
+    except Exception as e:
+        logging.error("An error occurred during distribution plots: %s", e)
+        raise e
+
+    # Assert that the plots are saved in the output folder
+    try:
         for col in COLS_TO_PLOT:
             assert os.path.exists(os.path.join(IMAGES_EDA_PATH, f"{col}_distribution.png"))
+    except AssertionError as err:
+        logging.error(
+            "Testing plot_distribution: The expected plots were not saved in the output folder"
+        )
+        raise err
+    
+def test_plot_correlation_matrix(data_analyzer: DataAnalyzer):
+    """
+    test plot correlation matrix function
+    """
+    logging.info("Plotting correlation matrix")
+
+    # Call the plot_correlation_matrix method
+    try:
+        data_analyzer.plot_correlation(IMAGES_EDA_PATH)
+        logging.info("Correlation matrix plot executed successfully")
+    except Exception as e:
+        logging.error("An error occurred during correlation matrix plot: %s", e)
+        raise e
+
+    # Assert that the plot is saved in the output folder
+    try:
         assert os.path.exists(os.path.join(IMAGES_EDA_PATH, "correlation_matrix.png"))
     except AssertionError as err:
         logging.error(
-            "Testing perform_eda: The expected plots were not saved in the output folder"
+            "Testing plot_correlation_matrix: The expected plot was not saved in the output folder"
         )
         raise err

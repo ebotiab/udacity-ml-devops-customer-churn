@@ -3,6 +3,7 @@ This module contains the ModelsTrainer class which is used to train models and s
 """
 
 import logging
+import os
 from typing import Any
 import joblib
 
@@ -30,7 +31,7 @@ class ModelsTrainer:
     def __init__(
         self,
         df: pd.DataFrame,
-        models_lst: list[Any],
+        models_dict: dict[str, Any],
         response: str | None = None,
         keep_cols: list[str] | None = None,
     ):
@@ -43,11 +44,11 @@ class ModelsTrainer:
         output:
             None
         """
+        self._feat_names = []
         self.X_train, self.X_test, self.y_train, self.y_test = (
             self.perform_feature_engineering(df, response, keep_cols)
         )
-        self.models_lst = models_lst
-        self.feature_importance = None
+        self.models_dict = models_dict
 
     def encoder_helper(
         self, df: pd.DataFrame, category_lst: list[str], response: str | None = None
@@ -85,10 +86,11 @@ class ModelsTrainer:
                 y_test: y testing data
         """
         response = response or df.columns[-1]
-        
+
         category_col_names = df.select_dtypes(include=["object"]).columns.to_list()
         df_encoded = self.encoder_helper(df, category_col_names, response)[keep_cols]
-        X = df_encoded[keep_cols or df_encoded.columns].values
+        self._feat_names = keep_cols or df_encoded.columns
+        X = df_encoded[self._feat_names].values
         y = df[response]
         return train_test_split(X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE)
 
@@ -110,6 +112,7 @@ class ModelsTrainer:
         train_report = str(classification_report(self.y_train, y_train_preds))
         test_report = str(classification_report(self.y_test, y_test_preds))
 
+        plt.figure(figsize=(20, 5))
         plt.rc("figure", figsize=(5, 5))
         plt_kw = {"fontsize": 10, "fontproperties": "monospace"}
         plt.text(0.01, 1.25, f"{model_name} Train", **plt_kw)
@@ -120,7 +123,7 @@ class ModelsTrainer:
         plt.savefig(out_filepath, bbox_inches="tight")
         logger.info("classification report generated and saved in %s", out_filepath)
 
-    def feature_importance_plot(self, model: Any, out_filepath: str):
+    def feature_importance_plot(self, model_name: str, out_filepath: str):
         """
         creates and stores the feature importance in pth
         input:
@@ -129,12 +132,13 @@ class ModelsTrainer:
             None
         """
         # Calculate feature importances
+        model = self.models_dict[model_name]
         importances = model.feature_importances_
         # Sort feature importances in descending order
         indices = np.argsort(importances)[::-1]
 
         # Rearrange feature names so they match the sorted feature importances
-        names = [self.X_train.columns[i] for i in indices]
+        names = [self._feat_names[i] for i in indices]
 
         # Create and save plot
         plt.figure(figsize=(20, 5))
@@ -148,7 +152,7 @@ class ModelsTrainer:
         logger.info("Feature importance plot generated and saved in %s", out_filepath)
 
     def plot_roc_curve(
-        self, y_preds: np.ndarray, out_filepath: str, fig: Figure | None = None
+        self, y_preds: np.ndarray, out_filepath: str, fig: Figure | None = None, model_name: str = "Model"
     ):
         """
         creates and plot the roc curve
@@ -168,47 +172,56 @@ class ModelsTrainer:
             ax.set_xlabel("False Positive Rate")
             ax.set_ylabel("True Positive Rate")
             ax.set_title("Receiver Operating Characteristic")
-            ax.legend(loc="lower right")
             # Plot the diagonal line
             ax.plot([0, 1], [0, 1], color="navy", lw=2, linestyle="--")
 
-        fig.gca().plot(false_positive_rate, true_positive_rate, lw=2, label="ROC Curve")
+        fig.gca().plot(false_positive_rate, true_positive_rate, lw=2, label=model_name)
+        fig.gca().legend(loc="lower right")
         fig.savefig(out_filepath, bbox_inches="tight")
-        logging.info("ROC curve generated and saved in %s", out_filepath)
+        logger.info("ROC curve generated and saved in %s", out_filepath)
 
         return fig
 
     def train_models(self, out_folder_path: str):
         """
-        train, store model results: images + scores, and store models
+        train and store models
         input:
             out_filepath: path to store the trained model
         output:
             None
         """
-        roc_fig = None
-        roc_img_filepath = f"{out_folder_path}/roc_curve.png"
-
-        for model in self.models_lst:
+        for model_name, model in self.models_dict.items():
             model.fit(self.X_train, self.y_train)
-
             model = model.best_estimator_ if isinstance(model, GridSearchCV) else model
-            model_name = model.__class__.__name__
+
+            model_filepath = os.path.join(out_folder_path, f"{model_name}_model.pkl")
+            joblib.dump(model, model_filepath)
+            logger.info("model trained saved in %s", model_filepath)
+
+    def evaluate_models(self, out_folder_path: str):
+        """
+        computes the results of the models and stores them in the desired folder
+        input:
+            out_folder_path: path to store the results
+        output:
+            None
+        """
+        roc_fig = None
+        roc_img_filepath = os.path.join(out_folder_path, "roc_curve.png")
+
+        for model_name, model in self.models_dict.items():
+            file_stem = os.path.join(out_folder_path, model_name)
 
             y_train_preds = model.predict(self.X_train)  # type: ignore
             y_test_preds = model.predict(self.X_test)  # type: ignore
 
-            report_filepath = f"{out_folder_path}/{model_name}_cl_report.png"
+            report_filepath = f"{file_stem}_cl_report.png"
             self.classification_report_image(
                 y_train_preds, y_test_preds, report_filepath, model_name
             )
 
             if isinstance(model, RandomForestClassifier):
-                feat_imp_filepath = f"{out_folder_path}/{model_name}_feat_imp.png"
-                self.feature_importance_plot(model, feat_imp_filepath)
+                feat_imp_filepath = f"{file_stem}_feat_imp.png"
+                self.feature_importance_plot(model_name, feat_imp_filepath)
 
-            roc_fig = self.plot_roc_curve(y_test_preds, roc_img_filepath, roc_fig)
-
-            model_filepath = f"{out_folder_path}/{model_name}_model.pkl"
-            joblib.dump(model, model_filepath)
-            logging.info("model trained saved in %s", model_filepath)
+            roc_fig = self.plot_roc_curve(y_test_preds, roc_img_filepath, roc_fig, model_name)

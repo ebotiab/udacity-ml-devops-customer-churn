@@ -1,0 +1,6 @@
+2024-03-06 13:12:12 [    INFO] Plotting distribution (test_data_analyzer.py:69)
+2024-03-06 13:12:13 [    INFO] Distribution saved in ./tests/images/eda/Churn_distribution.png (data_analyzer.py:118)
+2024-03-06 13:12:13 [    INFO] Distribution saved in ./tests/images/eda/Customer_Age_distribution.png (data_analyzer.py:118)
+2024-03-06 13:12:13 [    INFO] Distribution saved in ./tests/images/eda/Marital_Status_distribution.png (data_analyzer.py:118)
+2024-03-06 13:12:14 [    INFO] Distribution saved in ./tests/images/eda/Total_Trans_Ct_distribution.png (data_analyzer.py:118)
+2024-03-06 13:12:14 [    INFO] Distribution plots executed successfully (test_data_analyzer.py:75)

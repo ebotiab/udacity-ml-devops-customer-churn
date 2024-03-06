@@ -40,7 +40,7 @@ RANDOM_STATE = 42
 RFC_PARAMS = {"random_state": 42, "n_estimators": 100}
 RFC_PARAM_GRID = { 
     'n_estimators': [200, 500],
-    'max_features': ['auto', 'sqrt'],
+    'max_features': [None, 'sqrt'],
     'max_depth' : [4,5,100],
     'criterion' :['gini', 'entropy']
 }
@@ -48,4 +48,4 @@ NUM_FOLDS = 5
 
 # Use a different solver if the default 'lbfgs' fails to converge
 # Reference: https://scikit-learn.org/stable/modules/linear_model.html#logistic-regression
-LRC_PARAMS = {"solver":'lbfgs', "max_iter": 3000}
+LRC_PARAMS = {"solver":'newton-cholesky', "max_iter": 3000}

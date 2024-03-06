@@ -4,18 +4,17 @@ This module contains tests for the models_trainer module
 
 import logging
 import os
-from typing import Any
 
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.model_selection import GridSearchCV
 
-from tests.config import IMAGES_RESULTS_PATH, RESPONSE, KEEP_FEATS
-from predict_customer_churn import ModelsTrainer
+from .config import IMAGES_RESULTS_PATH, RESPONSE, KEEP_FEATS
+from ..predict_customer_churn import ModelsTrainer
 
 logging.basicConfig(
-    filename="./logs/churn_library.log",
+    filename="./tests/logs/churn_library.log",
     level=logging.INFO,
     filemode="w",
     format="%(name)s - %(levelname)s - %(message)s",
@@ -41,7 +40,8 @@ def test_encoder_helper(models_trainer: ModelsTrainer, churn_data: pd.DataFrame)
             f"{col}_{RESPONSE}" if col in cat_columns else col
             for col in churn_data.columns
         ]
-        assert all(col not in df_enc.columns for col in new_cols)
+        assert all(col in df_enc.columns for col in new_cols)
+        logging.info("Data encoding executed successfully")
     except AssertionError as err:
         logging.error(
             "Testing encoder_helper: The categorical columns were not replaced with encoded columns"
@@ -66,12 +66,15 @@ def test_perform_feature_engineering(
     except Exception as e:
         logging.error("An error occurred during feature engineering: %s", e)
         raise e
-    # Assert that the encoded dataframe has KEEP_COLS columns
+    # Assert that the encoded arrays have the expected shape and contain the expected columns
     try:
-        assert all(col not in X_train.columns for col in KEEP_FEATS)
-        assert all(col not in X_test.columns for col in KEEP_FEATS)
-        assert y_train.name == RESPONSE
-        assert y_test.name == RESPONSE
+        assert X_test.shape[1] == len(KEEP_FEATS)
+        assert X_test.shape[1] == len(KEEP_FEATS)
+        assert X_train.shape[0] + X_test.shape[0] == churn_data.shape[0]
+        assert len(y_train.shape) == 1
+        assert len(y_test.shape) == 1
+        assert y_train.shape[0] + y_test.shape[0] == churn_data.shape[0]
+        logging.info("Feature engineering executed successfully")
     except AssertionError as err:
         logging.error(
             "Testing perform_feature_engineering: The expected cols were not found in df"
@@ -101,6 +104,7 @@ def test_classification_report_image(
     # Assert that the necessary plots are saved in the output folder
     try:
         assert os.path.exists(img_results_filepath)
+        logging.info("Classification report saved successfully")
     except AssertionError as err:
         logging.error(
             "Testing classification_report_image: The classification report image was not saved"
@@ -108,7 +112,7 @@ def test_classification_report_image(
         raise err
 
 
-def test_feature_importance_plot(models_trainer: ModelsTrainer, first_model: Any):
+def test_feature_importance_plot(models_trainer: ModelsTrainer):
     """
     test feature_importance_plot
     """
@@ -116,7 +120,7 @@ def test_feature_importance_plot(models_trainer: ModelsTrainer, first_model: Any
 
     try:
         img_results_filepath = os.path.join("images", "results", "test_feat_imp.png")
-        models_trainer.feature_importance_plot(first_model, img_results_filepath)
+        models_trainer.feature_importance_plot("rfc", img_results_filepath)
         logging.info("Feature importance plot generated successfully")
     except Exception as e:
         logging.error(
@@ -127,6 +131,7 @@ def test_feature_importance_plot(models_trainer: ModelsTrainer, first_model: Any
     # Assert that the necessary plots are saved in the output folder
     try:
         assert os.path.exists(img_results_filepath)
+        logging.info("Feature importance plot saved successfully")
     except AssertionError as err:
         logging.error(
             "Testing feature_importance_plot: The feature importance plot was not saved"
@@ -151,18 +156,26 @@ def test_plot_roc_curve(models_trainer: ModelsTrainer, test_preds: np.ndarray):
     # Assert that the necessary plots are saved in the output folder
     try:
         assert os.path.exists(img_results_filepath)
+        logging.info("ROC curve saved successfully")
     except AssertionError as err:
         logging.error("Testing plot_roc_curve: The ROC curve was not saved")
         raise err
 
 
-def test_train_models(models_trainer: ModelsTrainer):
+def test_evaluate_models(models_trainer: ModelsTrainer):
     """
     test train_models
     """
     logging.info("Training models")
+
+    # remove all png files stored in the IMAGES_RESULTS_PATH folder
+    for file in os.listdir(IMAGES_RESULTS_PATH):
+        file_path = os.path.join(IMAGES_RESULTS_PATH, file)
+        if os.path.isfile(file_path) and file_path.endswith(".png"):
+            os.remove(file_path)
+            logging.info(f"Removed {file_path}")
     try:
-        models_trainer.train_models(IMAGES_RESULTS_PATH)
+        models_trainer.evaluate_models(IMAGES_RESULTS_PATH)
         logging.info("Models trained successfully")
     except Exception as e:
         logging.error("An error occurred during model training: %s", e)
@@ -171,15 +184,14 @@ def test_train_models(models_trainer: ModelsTrainer):
     # Assert that the necessary plots are saved in the output folder
     try:
         assert os.path.exists(f"{IMAGES_RESULTS_PATH}/roc_curve.png")
-        for model in models_trainer.models_lst:
+        for model_name, model in models_trainer.models_dict.items():
             if isinstance(model, GridSearchCV):
                 model = model.best_estimator_
-            model_name = model.__class__.__name__
             file_stem = f"{IMAGES_RESULTS_PATH}/{model_name}"
             assert os.path.exists(f"{file_stem}_cl_report.png")
             if isinstance(model, RandomForestClassifier):
                 assert os.path.exists(f"{file_stem}_feat_imp.png")
-            assert os.path.exists(f"{file_stem}_model.pkl")
+        logging.info("All necessary plots were saved")
     except AssertionError as err:
-        logging.error("Testing plot_roc_curve: The ROC curve was not saved")
+        logging.error("Testing evaluate_models: The necessary plots were not saved")
         raise err

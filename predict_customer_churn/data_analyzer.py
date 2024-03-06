@@ -103,16 +103,15 @@ class DataAnalyzer:
         output:
             None
         """
-        logger.info("Display the distribution of %s col:", col_name)
-        plt.figure(figsize=figsize)
         col_type = self.data[col_name].dtype
         if col_type in ["int64", "float64"]:
             sns.histplot(self.data[[col_name]], stat="density", kde=True)
         elif col_type == "object":
-            sns.countplot(self.data[[col_name]])
+            sns.countplot(self.data[[col_name]], x=col_name)
         else:
             logger.warning("Col %s has %s type invalid to plot", col_name, col_type)
             return
+        plt.figure(figsize=figsize)  #
         plt.title(f"Distribution of {col_name}")
         img_filepath = f"{out_folder}/{col_name}_distribution.png"
         plt.savefig(img_filepath)
@@ -129,9 +128,13 @@ class DataAnalyzer:
         output:
             None
         """
-        logger.info("Display the correlation matrix")
         plt.figure(figsize=figsize)
-        sns.heatmap(self.data.corr(), annot=False, cmap="Dark2_r", linewidths=2)
+        numeric_cols = self.data.select_dtypes(
+            include=["float", "int"]
+        ).columns.to_list()
+        sns.heatmap(
+            self.data[numeric_cols].corr(), annot=False, cmap="Dark2_r", linewidths=2
+        )
         plt.title("Correlation Matrix")
         img_filepath = f"{out_folder}/correlation_matrix.png"
         plt.savefig(img_filepath)
